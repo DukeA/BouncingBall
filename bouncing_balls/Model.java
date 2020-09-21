@@ -48,7 +48,9 @@ class Model {
             b.y = ballCollsion[1];
         }
     }
+    /*
 
+     */
     public double[] ballCollsionWall(Ball b, double deltaT) {
         // detect collision with the border
         if (b.x < b.radius || b.x > areaWidth - b.radius) {
@@ -60,8 +62,7 @@ class Model {
         // compute new position according to the speed of the ball
         b.x += deltaT * b.vx;
         b.y += deltaT * b.vy;
-        double[] ball = new double[]{b.x, b.y};
-        return ball;
+        return new double[]{b.x, b.y};
     }
 
     /*
@@ -69,11 +70,29 @@ class Model {
      */
     public void ballCollidedBall(Ball b, Ball otherBall) {
         if (hitOtherBall(b, otherBall)) {
-            double [] masses = {b.mass, otherBall.mass};
-            double[] velocitys = {b.vx + b.vy, otherBall.vx + otherBall.vy};
-            
+            //Calculates the  velocity for both of the  balls
+            double velocityball1 = Math.sqrt(b.vx* b.vx + b.vy*b.vy);
+            double velocityball2 = Math.sqrt(otherBall.vx* otherBall.vx
+                    + otherBall.vy * otherBall.vy);
+            double[] velocitys = {velocityball1,velocityball2};
+
+            //Calculate the  tehta angle for both balls
+            double theta1 = Math.atan(b.vx/b.vy);
+            double theta2 = Math.atan(otherBall.vx/otherBall.vy);
+            double[] theta ={theta1,theta2};
+
+            //Convert the  matrix both of the balls
+            double[] v1 =  RectToPolar(velocitys[0],theta[0]);
+            double[] v2 =  RectToPolar(velocitys[1], theta[1]);
 
 
+            if(v1[0]>v2[0]) {
+                double I = b.mass *v1[0] + otherBall.mass*v2[1];
+                double R = -(v2[0]-v1[0]);
+                double newvelocity = (I+otherBall.mass*R)/(b.mass+otherBall.mass);
+                double newVelocity2 =(I-b.mass*R)/(otherBall.mass*b.mass);
+
+            }
 
         }
     }
@@ -82,23 +101,29 @@ class Model {
         The  matrix equation for rotating the x-axis
         to get the Polar coordinates of the  matrix
      */
-    public double[] RectToPolar(Ball ball) {
-        double theta = Math.atan(ball.x / ball.y);
-        double[] ballPolar =
-                {ball.x*Math.cos(theta) + ball.y*Math.sin(theta),
-        -ball.x*Math.sin(theta) + ball.y*Math.cos(theta)};
-        return ballPolar;
+    public double[] RectToPolar(double velocity, double theta) {
+
+        double x = velocity*Math.cos(theta);
+        double y = velocity*Math.sin(theta);
+
+        return new double[]{
+                x*Math.cos(theta) + y*Math.sin(theta),
+                -x*Math.sin(theta) + y*Math.cos(theta)
+        };
     }
     /*
         The method which takes and rotates the values for the Polar coordinates
         and back to the React values.
      */
-    public double[] PolarToReact(Ball ball) {
-        double theta = Math.atan(ball.x/ ball.y);
-        double[] ballReact =
-                {ball.x*Math.cos(theta) - ball.y*Math.sin(theta),
-                ball.x*Math.sin(theta) + ball.y*Math.cos(theta) };
-        return ballReact;
+    public double[] PolarToReact(double velocity, double theta) {
+
+        double x = velocity*Math.cos(theta);
+        double y = velocity*Math.sin(theta);
+
+        return new double[]{
+            x*Math.cos(theta)- y*Math.sin(theta),
+            x*Math.sin(theta)+ y*Math.cos(theta)
+        };
     }
 
 
