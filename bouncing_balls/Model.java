@@ -26,10 +26,10 @@ class Model {
 
         // Initialize the model with a few balls
         balls = new Ball[2];
-        int random = (int) (10+Math.random()*50);
-        balls[0] = new Ball(width / 3, height * 0.9, 1.2, 1.6, 0.2,10 );
-        int random2 = (int) (10+Math.random()*50);
-        balls[1] = new Ball(2 * width / 3, height * 0.7, -0.6, 0.6, 0.3, 10);
+        int random = (int) (10 + Math.random() * 50);
+        balls[0] = new Ball(width / 3, height * 0.9, 1.2, 1.6, 0.2, 10, Color.GREEN);
+        int random2 = (int) (10 + Math.random() * 50);
+        balls[1] = new Ball(2 * width / 3, height * 0.7, -0.6, 0.6, 0.3, 10, Color.BLUE);
     }
 
     void step(double deltaT) {
@@ -48,6 +48,7 @@ class Model {
             b.y = ballCollsion[1];
         }
     }
+
     /*
 
      */
@@ -59,8 +60,6 @@ class Model {
         if (b.y < b.radius || b.y > areaHeight - b.radius) {
             b.vy *= -1;
         }
-
-
 
 
         // compute new position according to the speed of the ball
@@ -79,41 +78,6 @@ class Model {
     public void ballCollidedBall(Ball b, Ball otherBall) {
         if (hitOtherBall(b, otherBall)) {
 
-            //Calculates the  velocity for both of the  balls
-            double velocityball1 = Math.sqrt(b.vx* b.vx + b.vy*b.vy);
-            double velocityball2 = Math.sqrt(otherBall.vx* otherBall.vx
-                    + otherBall.vy * otherBall.vy);
-            double[] velocitys = {velocityball1,velocityball2};
-
-            //Calculate the  tehta angle for both balls
-            double theta1 = Math.atan(b.vx/b.vy);
-            double theta2 = Math.atan(otherBall.vx/otherBall.vy);
-            double[] theta ={theta1,theta2};
-
-            //Convert the  matrix both of the balls
-            double[] v1 =  RectToPolar(velocitys[0],theta[0]);
-            double[] v2 =  RectToPolar(velocitys[1], theta[1]);
-
-
-            if(v1[0]<v2[0]) {
-                double I = b.mass *v1[0] + otherBall.mass*v2[1];
-                double R = -(v2[0]-v1[0]);
-                double newvelocity = (I+otherBall.mass*R)/(b.mass+otherBall.mass);
-                double newVelocity2 =(I-b.mass*R)/(otherBall.mass*b.mass);
-
-                double[] newv1 = PolarToReact(newvelocity, theta[0]);
-                double[] newv2 = PolarToReact(newVelocity2, theta[1]);
-
-
-                b.set_velocity_x(newv1[0]);
-                b.set_velocity_y(newv1[1]);
-
-
-                otherBall.set_velocity_x(-newv2[0]);
-                otherBall.set_velocity_y(-newv2[1]);
-
-
-            }
 
         }
     }
@@ -124,26 +88,21 @@ class Model {
      */
     public double[] RectToPolar(double velocity, double theta) {
 
-        double x = velocity*Math.cos(10);
-        double y = velocity*Math.sin(10);
-
         return new double[]{
-                x*Math.cos(theta) + y*Math.sin(theta),
-                -x*Math.sin(theta) + y*Math.cos(theta)
+                x * Math.cos(theta) + y * Math.sin(theta),
+                -x * Math.sin(theta) + y * Math.cos(theta)
         };
     }
+
     /*
         The method which takes and rotates the values for the Polar coordinates
         and back to the React values.
      */
     public double[] PolarToReact(double velocity, double theta) {
 
-        double x = velocity*Math.cos(10);
-        double y = velocity*Math.sin(10);
-
         return new double[]{
-            x*Math.cos(theta)- y*Math.sin(theta),
-            x*Math.sin(theta)+ y*Math.cos(theta)
+                x * Math.cos(theta) - y * Math.sin(theta),
+                x * Math.sin(theta) + y * Math.cos(theta)
         };
     }
 
@@ -169,24 +128,27 @@ class Model {
      */
     class Ball {
 
-        Ball(double x, double y, double vx, double vy, double r, double mass) {
+        Ball(double x, double y, double vx, double vy, double r, double mass, Color color) {
             this.x = x;
             this.y = y;
             this.vx = vx;
             this.vy = vy;
             this.radius = r;
             this.mass = mass;
+            this.color = color;
         }
 
         /**
          * Position, speed, and radius of the ball. You may wish to add other attributes.
          */
         double x, y, vx, vy, radius, mass;
+        Color color;
 
-        public void set_velocity_x( double x ){
+        public void set_velocity_x(double x) {
             this.vx = x;
         }
-        public void set_velocity_y(double y){
+
+        public void set_velocity_y(double y) {
             this.vy = y;
         }
 
