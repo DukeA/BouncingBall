@@ -86,11 +86,11 @@ class Model {
         The  matrix equation for rotating the x-axis
         to get the Polar coordinates of the  matrix
      */
-    public double[] RectToPolar(double velocity, double theta) {
+    public double[] RectToPolar(double[] velocity, double theta) {
 
         return new double[]{
-                x * Math.cos(theta) + y * Math.sin(theta),
-                -x * Math.sin(theta) + y * Math.cos(theta)
+                velocity[0] * Math.cos(theta) + velocity[1] * Math.sin(theta),
+                -velocity[0] * Math.sin(theta) + velocity[1] * Math.cos(theta)
         };
     }
 
@@ -98,11 +98,11 @@ class Model {
         The method which takes and rotates the values for the Polar coordinates
         and back to the React values.
      */
-    public double[] PolarToReact(double velocity, double theta) {
+    public double[] PolarToReact(double[] velocity, double theta) {
 
         return new double[]{
-                x * Math.cos(theta) - y * Math.sin(theta),
-                x * Math.sin(theta) + y * Math.cos(theta)
+                velocity[0] * Math.cos(theta) - velocity[1] * Math.sin(theta),
+                velocity[0] * Math.sin(theta) + velocity[1] * Math.cos(theta)
         };
     }
 
