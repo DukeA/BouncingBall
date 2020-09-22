@@ -11,12 +11,12 @@ import java.awt.*;
  * <p>
  * The code has intentionally been kept as simple as possible, but if you wish, you can improve the design.
  *
- * @author Simon Robillard
+ * @author Adam Grandén
  */
 class Model {
 
     double areaWidth, areaHeight;
-    double GRAVITY = 9.8;
+    double GRAVITY = -9.8;
 
     Ball[] balls;
 
@@ -27,9 +27,9 @@ class Model {
         // Initialize the model with a few balls
         balls = new Ball[2];
         int random = (int) (10+Math.random()*50);
-        balls[0] = new Ball(width / 3, height * 0.9, 1.2, 1.6, 0.2,random );
+        balls[0] = new Ball(width / 3, height * 0.9, 1.2, 1.6, 0.2,10 );
         int random2 = (int) (10+Math.random()*50);
-        balls[1] = new Ball(2 * width / 3, height * 0.7, -0.6, 0.6, 0.3, random2);
+        balls[1] = new Ball(2 * width / 3, height * 0.7, -0.6, 0.6, 0.3, 10);
     }
 
     void step(double deltaT) {
@@ -59,17 +59,26 @@ class Model {
         if (b.y < b.radius || b.y > areaHeight - b.radius) {
             b.vy *= -1;
         }
+
+
+
+
         // compute new position according to the speed of the ball
         b.x += deltaT * b.vx;
         b.y += deltaT * b.vy;
+        //b.y += GRAVITY *deltaT;
+
+
         return new double[]{b.x, b.y};
     }
 
     /*
-        The method which checks if the ball collided with another ball.
+        The method which checks if the ball collided with another ball. In which if it hit's
+        the  velocity
      */
     public void ballCollidedBall(Ball b, Ball otherBall) {
         if (hitOtherBall(b, otherBall)) {
+
             //Calculates the  velocity for both of the  balls
             double velocityball1 = Math.sqrt(b.vx* b.vx + b.vy*b.vy);
             double velocityball2 = Math.sqrt(otherBall.vx* otherBall.vx
@@ -86,11 +95,23 @@ class Model {
             double[] v2 =  RectToPolar(velocitys[1], theta[1]);
 
 
-            if(v1[0]>v2[0]) {
+            if(v1[0]<v2[0]) {
                 double I = b.mass *v1[0] + otherBall.mass*v2[1];
                 double R = -(v2[0]-v1[0]);
                 double newvelocity = (I+otherBall.mass*R)/(b.mass+otherBall.mass);
                 double newVelocity2 =(I-b.mass*R)/(otherBall.mass*b.mass);
+
+                double[] newv1 = PolarToReact(newvelocity, theta[0]);
+                double[] newv2 = PolarToReact(newVelocity2, theta[1]);
+
+
+                b.set_velocity_x(newv1[0]);
+                b.set_velocity_y(newv1[1]);
+
+
+                otherBall.set_velocity_x(-newv2[0]);
+                otherBall.set_velocity_y(-newv2[1]);
+
 
             }
 
@@ -103,8 +124,8 @@ class Model {
      */
     public double[] RectToPolar(double velocity, double theta) {
 
-        double x = velocity*Math.cos(theta);
-        double y = velocity*Math.sin(theta);
+        double x = velocity*Math.cos(10);
+        double y = velocity*Math.sin(10);
 
         return new double[]{
                 x*Math.cos(theta) + y*Math.sin(theta),
@@ -117,8 +138,8 @@ class Model {
      */
     public double[] PolarToReact(double velocity, double theta) {
 
-        double x = velocity*Math.cos(theta);
-        double y = velocity*Math.sin(theta);
+        double x = velocity*Math.cos(10);
+        double y = velocity*Math.sin(10);
 
         return new double[]{
             x*Math.cos(theta)- y*Math.sin(theta),
@@ -162,11 +183,11 @@ class Model {
          */
         double x, y, vx, vy, radius, mass;
 
-        public void setVelocity_x( double v ){
-            this.vx = v;
+        public void set_velocity_x( double x ){
+            this.vx = x;
         }
-        public void setVelocity_y(double v){
-            this.vy = v;
+        public void set_velocity_y(double y){
+            this.vy = y;
         }
 
 
