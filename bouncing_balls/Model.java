@@ -25,18 +25,25 @@ class Model {
         areaHeight = height;
 
         // Initialize the model with a few balls
-        balls = new Ball[3];
+        balls = new Ball[5];
         balls[0] = new Ball(width / 4, height * 0.5, 0.5, 0.5, 0.2, 10, Color.GREEN);
         balls[1] = new Ball(width / 2, height * 0.5, 1.6, 0.8, 0.4, 20, Color.MAGENTA);
         balls[2] = new Ball(2 * width / 3, height * 0.7, -0.6, 0.6, 0.3, 20, Color.BLUE);
-        //balls[3] = new Ball(width / 6, height * 2, 1.2, 1.6, 0.2, 10, Color.CYAN);
+        balls[3] = new Ball(2*width / 4, height * 2, 1.2, 1.6, 0.2, 10, Color.CYAN);
+        balls[4] = new Ball(width / 3, height * 0.5, 1.2, 1.6, 0.2, 10, Color.ORANGE);
     }
 
     void step(double deltaT) {
         // TODO this method implements one step of simulation with a step deltaT
         for (int i = 0; i < balls.length; i++) {
             for (int j = i + 1; j < balls.length; j++) {
-                ballCollidedBall(balls[i], balls[j]);
+                if (hitOtherBall(balls[i], balls[j])) {
+                    ballCollidedBall(balls[i], balls[j]);
+                    while(hitOtherBall(balls[i], balls[j])){
+                        moveBallAfterCollision(balls[i], deltaT);
+                        moveBallAfterCollision(balls[j], deltaT);
+                    }
+                }
             }
 
         }
@@ -74,9 +81,6 @@ class Model {
         the  velocity
      */
     public void ballCollidedBall(Ball b, Ball otherBall) {
-        if (hitOtherBall(b, otherBall)) {
-
-            //moveBallBeforeCollision(b,otherBall);
 
             double[] ball1 = {b.vx, b.vy};
 
@@ -110,21 +114,16 @@ class Model {
 
             otherBall.vx = nv2[0];
             otherBall.vy = nv2[1];
-        }
+
     }
 
 
     /*
         The  ball is moved outside before the ball calculation is  done  for the  two balls.
      */
-    public void moveBallBeforeCollision(Ball b, Ball otherBall) {
-        double dx = otherBall.x - b.x;
-        double dy = otherBall.y - b.y;
-        double distance = Math.sqrt(dx * dx + dy * dy);
-        double x1 = (b.radius * dx) / distance;
-        double y1 = (b.radius * dx) / distance;
-        otherBall.x = x1 + otherBall.x;
-        otherBall.y = otherBall.y + y1;
+    public void moveBallAfterCollision(Ball b, double deltaT) {
+        b.x += deltaT * b.vx/100;
+        b.y += deltaT * b.vy/100;
     }
 
     public double[][] VelcocityCalc(double[] veclocityPolar, double[] velocity2Polar, Ball b, Ball otherball) {
