@@ -25,22 +25,20 @@ class Model {
         areaHeight = height;
 
         // Initialize the model with a few balls
-        balls = new Ball[4];
-        balls[0] = new Ball(width / 3, height * 0.9, 1.2, 1.6, 0.2, 10, Color.GREEN);
-        balls[1] = new Ball(width / 4, height * 0.5, 1.2, 1.6, 0.2, 10, Color.MAGENTA);
+        balls = new Ball[3];
+        balls[0] = new Ball(width / 4, height * 0.5, 0.5, 0.5, 0.2, 10, Color.GREEN);
+        balls[1] = new Ball(width / 2, height * 0.5, 1.6, 0.8, 0.4, 20, Color.MAGENTA);
         balls[2] = new Ball(2 * width / 3, height * 0.7, -0.6, 0.6, 0.3, 20, Color.BLUE);
-        balls[3] = new Ball(width / 6, height * 2, 1.2, 1.6, 0.2, 10, Color.CYAN);
+        //balls[3] = new Ball(width / 6, height * 2, 1.2, 1.6, 0.2, 10, Color.CYAN);
     }
 
     void step(double deltaT) {
         // TODO this method implements one step of simulation with a step deltaT
-        for (Ball b : balls) {
-            for (Ball otherBall : balls) {
-                if (b != otherBall) {
-
-                    ballCollidedBall(b, otherBall);
-                }
+        for (int i = 0; i < balls.length; i++) {
+            for (int j = i + 1; j < balls.length; j++) {
+                ballCollidedBall(balls[i], balls[j]);
             }
+
         }
 
         for (Ball b : balls) {
@@ -49,9 +47,9 @@ class Model {
             b.y = ballCollsion[1];
         }
     }
-
     /*
-
+        Checks the coalition between two  balls and that they are in between the  two walls
+        Added an impact for the gravity of the walls.
      */
     public double[] ballCollsionWall(Ball b, double deltaT) {
 
@@ -78,66 +76,94 @@ class Model {
     public void ballCollidedBall(Ball b, Ball otherBall) {
         if (hitOtherBall(b, otherBall)) {
 
-            double[] ball1 = {b.x, b.y};
-            double theta = Math.atan(b.x/b.y);
-            double[] ballV1 = {b.vx, b.vy};
+            //moveBallBeforeCollision(b,otherBall);
 
-            double[] ball2 = {otherBall.x, otherBall.vy};
-            double theta2 = Math.atan(otherBall.x/ otherBall.y);
-            double[] ballV2 = {otherBall.vx, otherBall.vy};
+            double[] ball1 = {b.vx, b.vy};
+
+
+            double[] ball2 = {otherBall.vx, otherBall.vy};
 
             //The angle which would be sgima in the equation between the values
-            double sigma = Math.atan(otherBall.vx - b.vx/ otherBall.vy - b.vy);
+            double theta = Math.atan((otherBall.y - b.y) / (otherBall.x - b.x));
 
-            double[] polarCoordinates = RectToPolar(ball1, theta, sigma);
-            double[] polarCoordinates2 = RectToPolar(ball2, theta2, sigma);
+            double[] polarVelocity = RectToPolar(ball1);
+            double[] polarVelocity2 = RectToPolar(ball2);
 
-            double velocity = Math.sqrt(polarCoordinates[0] * polarCoordinates[0]
-                    + polarCoordinates[1] * polarCoordinates[1]);
-            double velocity2 = Math.sqrt(polarCoordinates2[0] * polarCoordinates2[0] +
-                    polarCoordinates2[1] * polarCoordinates2[1]);
+            polarVelocity[1] = polarVelocity[1]-theta;
+            polarVelocity2[1] = polarVelocity2[1]-theta;
 
-            double I = b.mass * velocity + otherBall.mass * velocity2;
-            double R = -(velocity - velocity2);
 
-            double newvelocity = (I + otherBall.mass * R) / (b.mass + otherBall.mass);
-            double newVelocity2 = (I - b.mass * R) / (otherBall.mass * b.mass);
+            double[][] Velocitys = VelcocityCalc(polarVelocity, polarVelocity2, b,
+                    otherBall);
+            double[] newPolarVelocity = Velocitys[0];
+            double[] newPolarVelocity2 = Velocitys[1];
 
-            double nvx1 = newvelocity *
-                    Math.cos(ball1[0] / ball2[1]);
-            double nvy1 = newvelocity *
-                    Math.sin(ball1[0] / ball2[1]);
+            newPolarVelocity[1] = newPolarVelocity[1]+theta;
+            newPolarVelocity2[1] = newPolarVelocity2[1]+theta;
 
-            double nvx2 = newVelocity2 *
-                    Math.cos(ball2[0] / ball2[1]);
-            double nvy2 = newVelocity2 *
-                    Math.sin(ball2[0] / ball2[1]);
 
-            //Rotate problem to the  y-axis
-            double[] nv1 = PolarToReact(new double[]{nvx1, nvy1}, theta);
-            double[] nv2 = PolarToReact(new double[]{nvx2, nvy2}, theta);
+            double[] nv1 = PolarToRect(newPolarVelocity);
+            double[] nv2 = PolarToRect(newPolarVelocity2);
 
             b.vx = nv1[0];
             b.vy = nv1[1];
 
             otherBall.vx = nv2[0];
             otherBall.vy = nv2[1];
-
         }
+    }
+
+
+    /*
+        The  ball is moved outside before the ball calculation is  done  for the  two balls.
+     */
+    public void moveBallBeforeCollision(Ball b, Ball otherBall) {
+        double dx = otherBall.x - b.x;
+        double dy = otherBall.y - b.y;
+        double distance = Math.sqrt(dx * dx + dy * dy);
+        double x1 = (b.radius * dx) / distance;
+        double y1 = (b.radius * dx) / distance;
+        otherBall.x = x1 + otherBall.x;
+        otherBall.y = otherBall.y + y1;
+    }
+
+    public double[][] VelcocityCalc(double[] veclocityPolar, double[] velocity2Polar, Ball b, Ball otherball) {
+
+
+        double[] v1 = PolarToRect(veclocityPolar);
+        double[] v2 = PolarToRect(velocity2Polar);
+
+        double I = b.mass * v1[0] + otherball.mass * v2[0];
+        double R = v2[0] - v1[0];
+
+        double newvelocity = (I + (otherball.mass * R)) / (otherball.mass + b.mass);
+        double newvelocity2 = (I - (b.mass * R)) / (otherball.mass + b.mass);
+        v1[0] = newvelocity;
+        v2[0] = newvelocity2;
+        double[]v1Polar =RectToPolar(v1);
+        double[]v2Polar =RectToPolar(v2);
+
+        return new double[][]{v1Polar, v2Polar};
+
     }
 
     /*
         The  matrix equation for rotating the x-axis
         to get the Polar coordinates of the  matrix
      */
-    public double[] RectToPolar(double[] coordinates, double theta, double sigma) {
+    public double[] RectToPolar(double[] velocity) {
 
-        double r = Math.sqrt(coordinates[0]*coordinates[0]+ coordinates[1]*coordinates[1]);
-        double x = r* Math.cos(sigma);
-        double y = r * Math.sin(sigma);
+        double r = Math.sqrt(velocity[0]*velocity[0]+ velocity[1]*velocity[1]);
+        double sigma =0;
+        if(r >0) {
+            sigma = Math.atan(velocity[1] / velocity[0]);
+            if(velocity[0]<0){
+               sigma = sigma+Math.PI;
+            }
+        }
+
         return new double[]{
-                x * Math.cos(theta) + y * Math.sin(theta),
-                -x * Math.sin(theta) + y * Math.cos(theta)
+               r,sigma
         };
     }
 
@@ -145,11 +171,13 @@ class Model {
         The method which takes and rotates the values for the Polar coordinates
         and back to the React values.
      */
-    public double[] PolarToReact(double[] coordinates, double theta) {
+    public double[] PolarToRect(double[] Polar) {
+
+        double x = Math.cos(Polar[1])*Polar[0];
+        double y = Math.sin(Polar[1])*Polar[0];
 
         return new double[]{
-                coordinates[0] * Math.cos(theta) - coordinates[1] * Math.sin(theta),
-                coordinates[0] * Math.sin(theta) + coordinates[1] * Math.cos(theta)
+                x,y
         };
     }
 
@@ -160,12 +188,12 @@ class Model {
      */
     public boolean hitOtherBall(Ball b, Ball otherball) {
         double dx = b.x - otherball.x;
-        double yx = b.y - otherball.y;
+        double dy = b.y - otherball.y;
 
-        double distFromSquare = (dx * dx) + (yx * yx);
+        double distFromSquare = (dx * dx) + (dy * dy);
         double SumRadius = b.radius + otherball.radius;
 
-        double squaredRadius = SumRadius * SumRadius;
+        double squaredRadius = (SumRadius * SumRadius);
         return distFromSquare <= squaredRadius;
     }
 
