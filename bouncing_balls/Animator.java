@@ -17,7 +17,7 @@ import bouncing_balls.Model.Ball;
 /**
  * Animated JPanel drawing the bouncing balls. No modifications are needed in this class.
  *
- * @author Simon Robillard
+ * @author Adam Grandén
  *
  */
 @SuppressWarnings("serial")
@@ -60,6 +60,10 @@ public final class Animator extends JPanel implements ActionListener {
     	timer.stop();
     }
 
+    /**
+	 * Small Change here  was to change the  color on row  80 for
+	 * the balls having another color.
+     */
 	@Override
 	protected void paintComponent(Graphics g) {
 		Graphics2D g2 = (Graphics2D) g;

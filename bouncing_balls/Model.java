@@ -54,9 +54,14 @@ class Model {
             b.y = ballCollsion[1];
         }
     }
-    /*
-        Checks the coalition between two  balls and that they are in between the  two walls
-        Added an impact for the gravity of the walls.
+
+    /***
+     *  The new method that will check if there is a collision to a wall , while being affected by gravity.
+     *  Here what was changed is that gravity was added and the  other is that we check the vectors are
+     *  negative or positive when  going into the  different walls.
+     * @param b
+     * @param deltaT
+     * @return
      */
     public double[] ballCollsionWall(Ball b, double deltaT) {
 
@@ -76,9 +81,11 @@ class Model {
         return new double[]{b.x, b.y};
     }
 
-    /*
-        The method which checks if the ball collided with another ball. In which if it hit's
-        the  velocity
+    /**
+     * The method which takes care of the whole ball that  will collided with
+     * another ball and then sets the new vx and vy velocity to the  balls.
+     * @param b
+     * @param otherBall
      */
     public void ballCollidedBall(Ball b, Ball otherBall) {
 
@@ -118,14 +125,31 @@ class Model {
     }
 
 
-    /*
-        The  ball is moved outside before the ball calculation is  done  for the  two balls.
+    /**
+     * A speical case when there are more than 2 balls,
+     * if the balls are to close. Then they will move into each other
+     * in the case of ball1 and ball2 have been hit then they will intercept
+     * ball3 in this case.
+     * @param b
+     * @param deltaT
      */
     public void moveBallAfterCollision(Ball b, double deltaT) {
-        b.x += deltaT * b.vx/100;
-        b.y += deltaT * b.vy/100;
+
+        b.x += deltaT * b.vx/150;
+        b.y += deltaT * b.vy/150;
     }
 
+    /**
+     * The method takes the polar coordinates of the velocity and then
+     * converts it back to react coordinates to calculate the  new velocity.
+     *  Which then take the x-value and converts it back to the polar coordinates from
+     *  the React
+     * @param veclocityPolar
+     * @param velocity2Polar
+     * @param b
+     * @param otherball
+     * @return new Velocity
+     */
     public double[][] VelcocityCalc(double[] veclocityPolar, double[] velocity2Polar, Ball b, Ball otherball) {
 
 
@@ -146,9 +170,10 @@ class Model {
 
     }
 
-    /*
-        The  matrix equation for rotating the x-axis
-        to get the Polar coordinates of the  matrix
+    /**
+     * Method for taking the velocity from Rect Coordinates and converting them over to Polar Coordinates.
+     * @param velocity
+     * @return
      */
     public double[] RectToPolar(double[] velocity) {
 
@@ -166,9 +191,10 @@ class Model {
         };
     }
 
-    /*
-        The method which takes and rotates the values for the Polar coordinates
-        and back to the React values.
+    /***
+     *  The method which converts to Polar coordinates to React Coordinates in this case.
+     * @param Polar
+     * @return
      */
     public double[] PolarToRect(double[] Polar) {
 
@@ -218,13 +244,6 @@ class Model {
         double x, y, vx, vy, radius, mass;
         Color color;
 
-        public void set_velocity_x(double x) {
-            this.vx = x;
-        }
-
-        public void set_velocity_y(double y) {
-            this.vy = y;
-        }
 
 
     }
